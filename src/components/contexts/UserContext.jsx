@@ -1,18 +1,7 @@
 import {createContext, ReactNode, useContext, useReducer} from "react";
 import { User } from "firebase/auth";
 
-type AuthActions = { type: 'SIGN_IN', payload: { user: User } } | {type: 'SIGN_OUT'}
-
-type AuthState = {
-  state: 'SIGNED_IN'
-  currentUser: User;
-} | {
-  state: 'SIGNED_OUT'
-} | {
-  state: 'UNKNOWN'
-};
-
-const AuthReducer = (state: AuthState, action: AuthActions): AuthState => {
+const AuthReducer = (state, action) => {
   switch (action.type) {
     case "SIGN_IN":
       return {
@@ -27,15 +16,10 @@ const AuthReducer = (state: AuthState, action: AuthActions): AuthState => {
   }
 }
 
-type AuthContextProps = {
-  state: AuthState
-  dispatch: (value: AuthActions) => void
-}
-
 export const AuthContext = createContext<AuthContextProps>({ state: { state: 'UNKNOWN' }, dispatch: (val) => {
   } });
 
-const AuthProvider = ({ children }: { children: ReactNode }) => {
+const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(AuthReducer, { state: 'UNKNOWN' })
 
   return (
@@ -55,7 +39,7 @@ const useAuthState = () => {
 const useSignIn = () => {
   const {dispatch} = useContext(AuthContext)
   return {
-    signIn: (user: User) => {
+    signIn: (user) => {
       dispatch({type: "SIGN_IN", payload: {user}})
     }
   }
