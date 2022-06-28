@@ -1,9 +1,9 @@
-import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getAuth, Auth, connectAuthEmulator } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
-let firebaseApp: FirebaseApp;
+let firebaseApp;
 const useEmulator = () => import.meta.env.VITE_USE_FIREBASE_EMULATOR;
 
 export const setupFirebase = () => {
@@ -22,9 +22,9 @@ export const setupFirebase = () => {
   }
 };
 
-let auth: Auth;
-let firestore: ReturnType<typeof getFirestore>;
-let storage: ReturnType<typeof getStorage>;
+let auth;
+let firestore;
+let storage;
 
 export const useAuth = () => {
   auth = getAuth(firebaseApp);

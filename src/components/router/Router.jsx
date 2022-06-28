@@ -1,6 +1,6 @@
 import { Dialog } from '@headlessui/react';
 import { lazy, Suspense, useState } from 'react';
-import { Outlet, RouteObject, useRoutes, BrowserRouter } from 'react-router-dom';
+import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
 
 const Loading = () => <p className="p-4 w-full h-full text-center">Loading...</p>;
 
@@ -27,7 +27,7 @@ export const Router = () => {
 };
 
 const InnerRouter = () => {
-  const routes: RouteObject[] = [
+  const routes = [
     {
       path: '/',
       element: <Layout />,
