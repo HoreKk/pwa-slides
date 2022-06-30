@@ -3,11 +3,12 @@ import { useAuthState } from '~/components/contexts/UserContext';
 import { Head } from '~/components/shared/Head';
 import { Flex, Heading, Button, Tabs, TabList, Tab, TabPanels, TabPanel, Spinner, Skeleton, Box, AspectRatio, Text, calc } from '@chakra-ui/react';
 import { useDatabase } from '~/lib/firebase';
-import { ref, onValue, push, update } from "firebase/database";
+import { ref, onValue, push, update, remove } from "firebase/database";
 import { useParams } from "react-router-dom";
 import ReactQuill from 'react-quill';
+import toast from 'react-hot-toast';
 
-function Project({ params }) {
+function Project() {
   const { state } = useAuthState();
   const database = useDatabase()
 
@@ -18,23 +19,25 @@ function Project({ params }) {
 
   if (state.currentUser && !Object.values(project).length) {
     let refProject = ref(database, `workSpace-${state.currentUser.uid}/projects/${projectId}`)
+    let firstLoad = false
     onValue(refProject, (snapshot) => {
       let { slides, ...tmpProject } = snapshot.val()
       let tmpSlides = []
       Object.entries(slides).forEach(([key, value]) => tmpSlides.push({ id: key, ...value }))
-      setSelectedSlideId(!isLoaded ? tmpSlides[0].id : tmpSlides[tmpSlides.length].id)
       setProject({ ...tmpProject, slides: tmpSlides })
-      !isLoaded && setIsLoaded(true)
+      !firstLoad && setSelectedSlideId(tmpSlides[0].id)
+      setIsLoaded(true)
+      firstLoad = true
     });
   }
 
   function addSlide() {
-    console.log(project)
     if (state?.currentUser) {
       push(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides`), {
           name: "New Slide",
           content: "",
       });
+      toast.success('Slide added');
     }
   }
 
@@ -43,6 +46,18 @@ function Project({ params }) {
       update(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${id}`), {
         content,
       });
+    }
+  }
+
+  function deleteSlide() {
+    if (project.slides.length > 1) {
+      if (state?.currentUser) {
+        remove(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${selectedSlideId}`));
+      }
+      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id)
+      document.getElementById(`tabs-:r0:--tab-0`).click();
+    } else {
+      toast.error('You need at least one slide');
     }
   }
 
@@ -57,9 +72,14 @@ function Project({ params }) {
           <Skeleton isLoaded={isLoaded}>
             <Heading>{project.name}</Heading>
           </Skeleton>
-          <Button onClick={addSlide} colorScheme='green'>
-            Add new slide
-          </Button>
+          <Flex align='center'>
+            <Button onClick={addSlide} colorScheme='green'>
+              Add new slide
+            </Button>
+            <Button onClick={deleteSlide} colorScheme='red' ml={4}>
+              Delete current slide
+            </Button>
+          </Flex>
         </Flex>
         <Box mt={8} w='full'>
           {isLoaded ? (

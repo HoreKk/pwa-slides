@@ -5,6 +5,8 @@ import { useAuthState } from '~/components/contexts/UserContext';
 import { Container, Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
@@ -12,10 +14,12 @@ const ProjectScreen = lazy(() => import('~/components/screens/projects/Project')
 
 function Layout() {
   const { state } = useAuthState();
+  const navigate = useNavigate();
 
   const handleSignOut = () => {
     const auth = useAuth();
     auth.signOut();
+    navigate('/');
   };
 
   const handleSignIn = () => {
@@ -31,7 +35,7 @@ function Layout() {
     <>
       <Flex justify='space-between' align='center' p={4} bg='orange.200' w='full'>
         <Link href='/' style={{ textDecoration: 'none' }}>
-          <Heading size='lg'>PWA Slides</Heading>
+          <Heading size='lg'>Open Slide</Heading>
         </Link>
         <Skeleton isLoaded={state.state !== 'UNKNOWN'}>
           {state.state === 'SIGNED_OUT' ? (
@@ -46,6 +50,7 @@ function Layout() {
         </Skeleton>
       </Flex>
       <Outlet />
+      <Toaster />
     </>
   );
 }

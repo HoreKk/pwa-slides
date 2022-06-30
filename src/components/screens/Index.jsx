@@ -5,6 +5,7 @@ import { Flex, Heading, Button, SimpleGrid, Box, AspectRatio, LinkBox, LinkOverl
 import { useDatabase } from '~/lib/firebase';
 import { ref, push, onValue } from "firebase/database";
 import { Link as RouterLink } from 'react-router-dom';
+import toaster from "react-hot-toast";
 
 function Index() {
   const { state } = useAuthState();
@@ -26,6 +27,7 @@ function Index() {
       push(ref(database, `/workSpace-${state.currentUser.uid}/projects`), {
           name: "New Project",
       });
+      toaster.success('Project created');
     }
   }
 
