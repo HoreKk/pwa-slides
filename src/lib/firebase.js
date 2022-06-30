@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 
@@ -24,6 +25,7 @@ export const setupFirebase = () => {
 
 let auth;
 let firestore;
+let database;
 let storage;
 
 export const useAuth = () => {
@@ -43,6 +45,14 @@ export const useFirestore = () => {
   }
   return firestore;
 };
+
+export const useDatabase = () => {
+  if (!database) {
+    database = getDatabase();
+  }
+  return database;
+};
+
 
 export const useStorage = () => {
   if (!storage) {

@@ -2,17 +2,16 @@ import { useAuth } from "~/lib/firebase";
 import { lazy, Suspense, useState } from 'react';
 import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
 import { useAuthState } from '~/components/contexts/UserContext';
-import { Box, Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
+import { Container, Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
+const ProjectScreen = lazy(() => import('~/components/screens/projects/Project'));
 
 function Layout() {
   const { state } = useAuthState();
-
-  console.log(state)
 
   const handleSignOut = () => {
     const auth = useAuth();
@@ -46,7 +45,9 @@ function Layout() {
           )}
         </Skeleton>
       </Flex>
-      <Outlet />
+      <Container maxW='6xl' pt={8}>
+        <Outlet />
+      </Container>
     </div>
   );
 }
@@ -68,6 +69,10 @@ const InnerRouter = () => {
         {
           index: true,
           element: <IndexScreen />,
+        },
+        {
+          path: '/projects/:projectId',
+          element: <ProjectScreen />,
         },
         {
           path: '*',
