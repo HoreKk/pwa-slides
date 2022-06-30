@@ -28,7 +28,7 @@ function Layout() {
   };
 
   return (
-    <div>
+    <>
       <Flex justify='space-between' align='center' p={4} bg='orange.200' w='full'>
         <Link href='/' style={{ textDecoration: 'none' }}>
           <Heading size='lg'>PWA Slides</Heading>
@@ -45,10 +45,8 @@ function Layout() {
           )}
         </Skeleton>
       </Flex>
-      <Container maxW='6xl' pt={8}>
-        <Outlet />
-      </Container>
-    </div>
+      <Outlet />
+    </>
   );
 }
 

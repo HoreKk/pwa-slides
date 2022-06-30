@@ -32,16 +32,16 @@ function Index() {
   return (
     <>
       <Head title="TOP PAGE" />
-      <Flex flexDir='column'>
+      <Flex flexDir='column' px={20} pt={12}>
         <Flex justify='space-between' align='center' w='full'>
           <Heading>Mes présentations</Heading>
           <Button onClick={createProject} colorScheme='green'>
             Add new project
           </Button>
         </Flex>
-        <SimpleGrid minChildWidth='200px' spacing={12} mt={12}>
+        <SimpleGrid minChildWidth='250px' spacing={12} mt={12}>
           {projects.map((project) => (
-            <LinkBox as='article' key={project.id}>
+            <LinkBox as='article' key={project.id} maxW="250px" textAlign='center'>
               <AspectRatio borderRadius='lg' ratio={1} bg='yellow.100'>
                 <LinkOverlay as={RouterLink} to={`/projects/${project.id}`}>
                   <Heading>{project.name}</Heading>
