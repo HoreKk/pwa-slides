@@ -1,4 +1,4 @@
-import {createContext, useContext, useReducer} from "react";
+import { createContext, useContext, useReducer } from "react";
 
 const AuthReducer = (state, action) => {
   switch (action.type) {
@@ -15,8 +15,10 @@ const AuthReducer = (state, action) => {
   }
 }
 
-export const AuthContext = createContext({ state: { state: 'UNKNOWN' }, dispatch: (val) => {
-  } });
+export const AuthContext = createContext({
+  state: { state: 'UNKNOWN' }, dispatch: (val) => {
+  }
+});
 
 const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(AuthReducer, { state: 'UNKNOWN' })
@@ -36,19 +38,19 @@ const useAuthState = () => {
 };
 
 const useSignIn = () => {
-  const {dispatch} = useContext(AuthContext)
+  const { dispatch } = useContext(AuthContext)
   return {
     signIn: (user) => {
-      dispatch({type: "SIGN_IN", payload: {user}})
+      dispatch({ type: "SIGN_IN", payload: { user } })
     }
   }
 }
 
 const useSignOut = () => {
-  const {dispatch} = useContext(AuthContext)
+  const { dispatch } = useContext(AuthContext)
   return {
     signOut: () => {
-      dispatch({type: "SIGN_OUT"})
+      dispatch({ type: "SIGN_OUT" })
     }
   }
 }
