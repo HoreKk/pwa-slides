@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill';
 import { useParams } from "react-router-dom";
 import { useAuthState } from '~/components/contexts/UserContext';
-import { useDatabase } from '~/lib/firebase';
+import { database } from '../../../lib/firebase';
 
 const modules = {
   toolbar: [
@@ -27,7 +27,6 @@ const formats = [
 
 function Project() {
   const { state } = useAuthState();
-  const database = useDatabase()
 
   const { projectId } = useParams();
   const [project, setProject] = useState({});

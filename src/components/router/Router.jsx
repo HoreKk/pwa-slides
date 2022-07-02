@@ -1,12 +1,13 @@
-import { useAuth } from "~/lib/firebase";
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useContext, useState } from 'react';
 import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
 import { useAuthState } from '~/components/contexts/UserContext';
-import { Container, Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
+import { Container, Button, Heading, Flex, Skeleton, Link, Text } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { auth } from '../../lib/firebase';
+import { NetworkStateContext } from '../contexts/NetworkStateContext';
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
@@ -16,15 +17,15 @@ function Layout() {
   const { state } = useAuthState();
   const navigate = useNavigate();
 
+  const { networkState } = useContext(NetworkStateContext);
+
   const handleSignOut = () => {
-    const auth = useAuth();
     auth.signOut();
     navigate('/');
   };
 
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
-    const auth = useAuth();
     // @see https://firebase.google.com/docs/auth/web/google-signin
     auth.languageCode = 'fr';
 
@@ -33,9 +34,12 @@ function Layout() {
 
   return (
     <>
-      <Flex justify='space-between' align='center' p={4} bg='orange.200' w='full'>
+      <Flex justify='space-between' align='center' p={4} bg={networkState ? 'orange.200' : 'grey'} w='full'>
         <Link href='/' style={{ textDecoration: 'none' }}>
-          <Heading size='lg'>Open Slide</Heading>
+          <Flex alignItems='center'>
+            <Heading marginRight='5' size='lg'>Open Slide</Heading>
+            {!networkState ? <Text fontSize='sm'>(Offline mode activated)</Text> : <></> }
+          </Flex>
         </Link>
         <Skeleton isLoaded={state.state !== 'UNKNOWN'}>
           {state.state === 'SIGNED_OUT' ? (
