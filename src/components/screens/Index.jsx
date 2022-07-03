@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuthState } from '~/components/contexts/UserContext';
 import { Head } from '~/components/shared/Head';
-import { Flex, Heading, Button, SimpleGrid, Box, AspectRatio, LinkBox, LinkOverlay } from '@chakra-ui/react';
+import { Flex, Heading, Button, SimpleGrid, Text, AspectRatio, LinkBox, LinkOverlay } from '@chakra-ui/react';
 import { useDatabase } from '~/lib/firebase';
 import { ref, push, onValue } from "firebase/database";
 import { Link as RouterLink } from 'react-router-dom';
@@ -25,7 +25,7 @@ function Index() {
   function createProject() {
     if (state?.currentUser) {
       push(ref(database, `/workSpace-${state.currentUser.uid}/projects`), {
-          name: "New Project",
+          name: `New Project ${projects.length + 1}`,
       });
       toaster.success('Project created');
     }
@@ -33,20 +33,21 @@ function Index() {
 
   return (
     <>
-      <Head title="TOP PAGE" />
+      <Head title="Home" />
       <Flex flexDir='column' px={20} pt={12}>
         <Flex justify='space-between' align='center' w='full'>
-          <Heading>Mes présentations</Heading>
+          <Heading>My presentations</Heading>
           <Button onClick={createProject} colorScheme='green'>
             Add new project
           </Button>
         </Flex>
-        <SimpleGrid minChildWidth='250px' spacing={12} mt={12}>
+        <hr></hr>
+        <SimpleGrid minChildWidth='240px' spacing={8} mt={12}>
           {projects.map((project) => (
             <LinkBox as='article' key={project.id} maxW="250px" textAlign='center'>
-              <AspectRatio borderRadius='lg' ratio={1} bg='yellow.100'>
+              <AspectRatio borderRadius='lg' ratio={1} bg='yellow.50' border='1px'>
                 <LinkOverlay as={RouterLink} to={`/projects/${project.id}`}>
-                  <Heading>{project.name}</Heading>
+                  <Text fontSize={20} fontWeight={300}>{project.name}</Text>
                 </LinkOverlay>
               </AspectRatio>
             </LinkBox>

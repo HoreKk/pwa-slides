@@ -1,12 +1,12 @@
-import { useAuth } from "~/lib/firebase";
-import { lazy, Suspense, useState } from 'react';
+import { useAuth } from '~/lib/firebase';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
 import { useAuthState } from '~/components/contexts/UserContext';
-import { Container, Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
+import { Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
@@ -15,6 +15,7 @@ const ProjectScreen = lazy(() => import('~/components/screens/projects/Project')
 function Layout() {
   const { state } = useAuthState();
   const navigate = useNavigate();
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleSignOut = () => {
     const auth = useAuth();
@@ -31,24 +32,42 @@ function Layout() {
     signInWithRedirect(auth, provider);
   };
 
+  useEffect(() => {
+    document.addEventListener(
+      'fullscreenchange',
+      () => {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          setIsFullscreen(true);
+        }
+      },
+      false
+    );
+  }, [isFullscreen]);
+
   return (
     <>
-      <Flex justify='space-between' align='center' p={4} bg='orange.200' w='full'>
-        <Link href='/' style={{ textDecoration: 'none' }}>
-          <Heading size='lg'>Open Slide</Heading>
-        </Link>
-        <Skeleton isLoaded={state.state !== 'UNKNOWN'}>
-          {state.state === 'SIGNED_OUT' ? (
-            <Button onClick={handleSignIn} colorScheme='red' icon={<CloseIcon />}>
-              Sign In with Google
-            </Button>
-          ) : (
-            <Button onClick={handleSignOut} colorScheme='red' icon={<CloseIcon />}>
-              Sign Out
-            </Button>
-          )}
-        </Skeleton>
-      </Flex>
+      {isFullscreen ? (
+        ''
+      ) : (
+        <Flex justify="space-between" align="center" p={2} bg="orange.100" w="full">
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <Heading size="lg" ml={3}>Open Slides</Heading>
+          </Link>
+          <Skeleton isLoaded={state.state !== 'UNKNOWN'} mr={3}>
+            {state.state === 'SIGNED_OUT' ? (
+              <Button onClick={handleSignIn} colorScheme="red" icon={<CloseIcon />}>
+                Sign In with Google
+              </Button>
+            ) : (
+              <Button onClick={handleSignOut} colorScheme="red" icon={<CloseIcon />}>
+                Sign Out
+              </Button>
+            )}
+          </Skeleton>
+        </Flex>
+      )}
       <Outlet />
       <Toaster />
     </>
