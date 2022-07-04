@@ -1,12 +1,13 @@
-import { useAuth } from '~/lib/firebase';
-import { lazy, Suspense, useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect, useContext } from 'react';
 import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
 import { useAuthState } from '~/components/contexts/UserContext';
-import { Button, Heading, Flex, Skeleton, Link } from '@chakra-ui/react';
+import { Button, Heading, Flex, Skeleton, Link, Text } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { auth } from '../../lib/firebase';
+import { NetworkStateContext } from '../contexts/NetworkStateContext';
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
@@ -17,15 +18,15 @@ function Layout() {
   const navigate = useNavigate();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const { networkState } = useContext(NetworkStateContext);
+
   const handleSignOut = () => {
-    const auth = useAuth();
     auth.signOut();
     navigate('/');
   };
 
   const handleSignIn = () => {
     const provider = new GoogleAuthProvider();
-    const auth = useAuth();
     // @see https://firebase.google.com/docs/auth/web/google-signin
     auth.languageCode = 'fr';
 
@@ -51,9 +52,12 @@ function Layout() {
       {isFullscreen ? (
         ''
       ) : (
-        <Flex justify="space-between" align="center" p={2} bg="orange.100" w="full">
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Heading size="lg" ml={3}>Open Slides</Heading>
+        <Flex justify='space-between' align='center' p={2} bg={networkState ? 'orange.100' : 'grey'} w='full'>
+          <Link href='/' style={{ textDecoration: 'none' }}>
+            <Flex alignItems='center'>
+              <Heading marginRight='5' size='lg' ml={3}>Open Slides</Heading>
+              {!networkState ? <Text fontSize='sm'>(Offline mode activated)</Text> : <></> }
+            </Flex>
           </Link>
           <Skeleton isLoaded={state.state !== 'UNKNOWN'} mr={3}>
             {state.state === 'SIGNED_OUT' ? (
@@ -93,7 +97,7 @@ const InnerRouter = () => {
           element: <IndexScreen />,
         },
         {
-          path: '/projects/:projectId',
+          path: '/workspace-:userId/projects/:projectId',
           element: <ProjectScreen />,
         },
         {

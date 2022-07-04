@@ -1,34 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useAuthState } from '~/components/contexts/UserContext';
-import { Head } from '~/components/shared/Head';
-import {
-  Flex,
-  Heading,
-  Button,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Spinner,
-  Skeleton,
-  Box,
-  AspectRatio,
-  Text,
-  Input,
-} from '@chakra-ui/react';
-import { useDatabase } from '~/lib/firebase';
-import { ref, onValue, push, update, remove } from 'firebase/database';
-import { useParams } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import toast from 'react-hot-toast';
+// import { Head } from '~/components/shared/Head';
 import { Presentation } from './Reveal';
+import { AspectRatio, Box, Button, Flex, Heading, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
+import { onValue, push, ref, remove, update } from "firebase/database";
+import toast from 'react-hot-toast';
+import ReactQuill from 'react-quill';
+import { useParams } from "react-router-dom";
+import { database } from '../../../lib/firebase';
+
+const modules = {
+  toolbar: [
+    [{ 'header': [1, 2, false] }],
+    ['bold', 'italic', 'underline','strike', 'blockquote'],
+    [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+    [{ 'color': [] }],
+    ['link', 'image'],
+    ['clean']
+  ],
+}
+
+const formats = [
+  'header',
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'color'
+]
 
 function Project() {
   const { state } = useAuthState();
-  const database = useDatabase();
 
-  const { projectId } = useParams();
+  const { userId, projectId } = useParams();
   const [project, setProject] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedSlideId, setSelectedSlideId] = useState(null);
@@ -36,7 +38,7 @@ function Project() {
   const [projectName, setProjectName] = useState('Untitled Project');
 
   if (state.currentUser && !Object.values(project).length) {
-    let refProject = ref(database, `workSpace-${state.currentUser.uid}/projects/${projectId}`);
+    let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`)
     let firstLoad = false;
     let firstSlideInitialized = false;
     onValue(refProject, async (snapshot) => {
@@ -44,7 +46,7 @@ function Project() {
       let tmpSlides = [];
       if (!slides && !firstSlideInitialized) {
         firstSlideInitialized = true;
-        await push(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides`), {
+        await push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
           name: 'New Slide',
           content: '',
         });
@@ -63,29 +65,23 @@ function Project() {
   }
 
   function addSlide() {
-    if (state?.currentUser) {
-      push(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides`), {
-        name: 'New Slide',
-        content: '',
-      });
-      toast.success('Slide added');
-    }
+    push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
+      name: "New Slide",
+      content: "",
+    });
+    toast.success('Slide added');
   }
 
   function changeContentSlide(id, content) {
-    if (state?.currentUser) {
-      update(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${id}`), {
-        content,
-      });
-    }
+    update(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${id}`), {
+      content,
+    });
   }
 
   function deleteSlide() {
     if (project.slides.length > 1) {
-      if (state?.currentUser) {
-        remove(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${selectedSlideId}`));
-      }
-      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id);
+      remove(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${selectedSlideId}`));
+      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id)
       document.getElementById(`tabs-:r0:--tab-0`).click();
     } else {
       toast.error('You need at least one slide');
@@ -119,8 +115,8 @@ function Project() {
       },
       false
     );
-    if (state && state.currentUser && state.currentUser.uid && projectName !== project.name) {
-      update(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}`), {
+    if (state && state.currentUser && userId && projectName !== project.name) {
+      update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
         name: projectName,
       });
     }
