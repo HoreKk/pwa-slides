@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill';
 import { useParams } from "react-router-dom";
 import { database } from '../../../lib/firebase';
+import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
 
 const modules = {
   toolbar: [
@@ -28,7 +29,6 @@ const formats = [
 ]
 
 function Project() {
-  const { state } = useAuthState();
 
   const { userId, projectId } = useParams();
   const [project, setProject] = useState({});
@@ -135,6 +135,7 @@ function Project() {
               </Heading>
             </Skeleton>
             <Flex align="center">
+              <CopyLinkModal />
               <Button onClick={toggleFullScreen} colorScheme="blue" ml={4}>
                 Start presentation
               </Button>
