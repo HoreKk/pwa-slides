@@ -28,13 +28,13 @@ const formats = [
 function Project() {
   const { state } = useAuthState();
 
-  const { projectId } = useParams();
+  const { userId, projectId } = useParams();
   const [project, setProject] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedSlideId, setSelectedSlideId] = useState(null);
 
-  if (state.currentUser && !Object.values(project).length) {
-    let refProject = ref(database, `workSpace-${state.currentUser.uid}/projects/${projectId}`)
+  if (userId && !Object.values(project).length) {
+    let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`)
     let firstLoad = false
     onValue(refProject, (snapshot) => {
       let { slides, ...tmpProject } = snapshot.val()
@@ -48,28 +48,22 @@ function Project() {
   }
 
   function addSlide() {
-    if (state?.currentUser) {
-      push(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides`), {
+    push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
         name: "New Slide",
         content: "",
-      });
-      toast.success('Slide added');
-    }
+    });
+    toast.success('Slide added');
   }
 
   function changeContentSlide(id, content) {
-    if (state?.currentUser) {
-      update(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${id}`), {
-        content,
-      });
-    }
+    update(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${id}`), {
+      content,
+    });
   }
 
   function deleteSlide() {
     if (project.slides.length > 1) {
-      if (state?.currentUser) {
-        remove(ref(database, `/workSpace-${state.currentUser.uid}/projects/${projectId}/slides/${selectedSlideId}`));
-      }
+      remove(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${selectedSlideId}`));
       setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id)
       document.getElementById(`tabs-:r0:--tab-0`).click();
     } else {

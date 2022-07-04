@@ -40,9 +40,6 @@ function Index() {
       getIdbProjects().then(async (prjs) => {
         for (const project of prjs) {
           if (project.id.startsWith('idxDb-')) {
-            console.log('🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩')
-            console.log(project)
-            console.log('🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦')
             await writeProject({
               userId: authState.currentUser.uid,
               name: project.name,
@@ -53,25 +50,6 @@ function Index() {
       });
     }
   }, [authState, networkState]);
-
-  // const first = useRef(true);
-  // useEffect(() => {
-  //   if (first.current) {
-  //     first.current = false;
-  //     return;
-  //   }
-  //   if (networkState) {
-  //     getIdbProjects().then(async (prjs) => {
-  //       await new Promise((resolve) => setTimeout(resolve, 2000));
-  //       push(ref(database, `/workSpace-${state.currentUser.uid}/projects`), {
-  //         "name": "New Project",
-  //         "desc": "okok",
-  //         "id": "idxDb-7dfa1825-318c-4f76-a27a-1939ec7e4c34"
-  //       })
-  //     })
-  //   }
-
-  // }, [networkState])
 
   async function createProject() {
     if (authState?.currentUser) {
@@ -101,9 +79,9 @@ function Index() {
         </Flex>
         <SimpleGrid minChildWidth="250px" spacing={12} mt={12}>
           {projects.map((project) => (
-            <LinkBox as="article" key={project.id} maxW="250px" textAlign="center">
-              <AspectRatio borderRadius="lg" ratio={1} bg="yellow.100">
-                <LinkOverlay as={RouterLink} to={`/projects/${project.id}`}>
+            <LinkBox as='article' key={project.id} maxW="250px" textAlign='center'>
+              <AspectRatio borderRadius='lg' ratio={1} bg='yellow.100'>
+                <LinkOverlay as={RouterLink} to={`/workspace-${authState.currentUser.uid}/projects/${project.id}`}>
                   <Heading>{project.name}</Heading>
                 </LinkOverlay>
               </AspectRatio>
