@@ -14,6 +14,7 @@ function Index() {
   const [projects, setProjects] = useState([]);
   
   if (state.currentUser && !projects.length) {
+    console.log(state.currentUser)
     let refProjects = ref(database, `workSpace-${state.currentUser.uid}/projects`)
     onValue(refProjects, (snapshot) => {
       let tmpProjects = []
@@ -45,7 +46,7 @@ function Index() {
           {projects.map((project) => (
             <LinkBox as='article' key={project.id} maxW="250px" textAlign='center'>
               <AspectRatio borderRadius='lg' ratio={1} bg='yellow.100'>
-                <LinkOverlay as={RouterLink} to={`/projects/${project.id}`}>
+                <LinkOverlay as={RouterLink} to={`/workspace-${state.currentUser.uid}/projects/${project.id}`}>
                   <Heading>{project.name}</Heading>
                 </LinkOverlay>
               </AspectRatio>

@@ -74,7 +74,7 @@ const InnerRouter = () => {
           element: <IndexScreen />,
         },
         {
-          path: '/projects/:projectId',
+          path: '/workspace-:userId/projects/:projectId',
           element: <ProjectScreen />,
         },
         {
