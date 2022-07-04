@@ -22,7 +22,7 @@ export const NetworkState = ({ children }) => {
     return () => {
       document.removeEventListener("connection-changed", handleNetwork)
     }
-  })
+  }, [])
 
   useEffect(() => {
     if (networkState) {
