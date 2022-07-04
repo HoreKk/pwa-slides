@@ -37,7 +37,7 @@ function Project() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [projectName, setProjectName] = useState('Untitled Project');
 
-  if (state.currentUser && !Object.values(project).length) {
+  if (userId && !Object.values(project).length) {
     let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`)
     let firstLoad = false;
     let firstSlideInitialized = false;
@@ -115,7 +115,7 @@ function Project() {
       },
       false
     );
-    if (state && state.currentUser && userId && projectName !== project.name) {
+    if (userId && projectName !== project.name) {
       update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
         name: projectName,
       });
@@ -188,6 +188,8 @@ function Project() {
                         key={slide.id}
                         onChange={(content) => changeContentSlide(slide.id, content)}
                         style={{ height: 'calc(100vh - 207px)' }}
+                        formats={formats}
+                        modules={modules}
                       >
                         <Box className="my-editing-area" />
                       </ReactQuill>

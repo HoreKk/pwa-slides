@@ -16,7 +16,7 @@ function Main() {
         signOut();
       }
     });
-  }, []);
+  }, [authChanged]);
 
   return (
     <main>

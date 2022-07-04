@@ -9,7 +9,7 @@ const container = document.getElementById("root");
 const root = createRoot(container);
 
 checkConnectivity({
-  interval: 3000,
+  interval: 4000,
   threshold: 2000,
 });
 

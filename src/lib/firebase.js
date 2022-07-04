@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getDatabase, onDisconnect, onValue, push, ref, serverTimestamp } from 'firebase/database';
+import { getDatabase, remove, onValue, push, ref, serverTimestamp } from 'firebase/database';
 
 const app = initializeApp({
   apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
@@ -41,6 +41,11 @@ export const readProjects = async (userId, cb = () => {}) => {
       cb(tmpProjects)
     }
   );
+}
+
+export function deleteProject({ userId, projectId }) {
+  const path = ref(database, `/workSpace-${userId}/projects/${projectId}`);
+  remove(path);
 }
 
 export function getUser() {

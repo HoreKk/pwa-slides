@@ -1,9 +1,9 @@
 import { lazy, Suspense, useState, useEffect, useContext } from 'react';
 import { Outlet, useRoutes, BrowserRouter } from 'react-router-dom';
-import { useAuthState } from '~/components/contexts/UserContext';
+import { useAuthState, useSignOut } from '~/components/contexts/UserContext';
 import { Button, Heading, Flex, Skeleton, Link, Text } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, signInWithPopup } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { auth } from '../../lib/firebase';
@@ -52,16 +52,18 @@ function Layout() {
       {isFullscreen ? (
         ''
       ) : (
-        <Flex justify='space-between' align='center' p={2} bg={networkState ? 'orange.100' : 'grey'} w='full'>
-          <Link href='/' style={{ textDecoration: 'none' }}>
-            <Flex alignItems='center'>
-              <Heading marginRight='5' size='lg' ml={3}>Open Slides</Heading>
-              {!networkState ? <Text fontSize='sm'>(Offline mode activated)</Text> : <></> }
+        <Flex justify="space-between" align="center" p={2} bg={networkState ? 'orange.100' : 'grey'} w="full">
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <Flex alignItems="center">
+              <Heading marginRight="5" size="lg" ml={3}>
+                Open Slides
+              </Heading>
+              {!networkState ? <Text fontSize="sm">(Offline mode activated)</Text> : <></>}
             </Flex>
           </Link>
           <Skeleton isLoaded={state.state !== 'UNKNOWN'} mr={3}>
             {state.state === 'SIGNED_OUT' ? (
-              <Button onClick={handleSignIn} colorScheme="red" icon={<CloseIcon />}>
+              <Button onClick={handleSignIn} colorScheme="orange" icon={<CloseIcon />}>
                 Sign In with Google
               </Button>
             ) : (
