@@ -13,22 +13,20 @@ export function initDB() {
   });
 }
 
-const done = (tx) => tx.done.then(() => document.dispatchEvent(new Event('db-updated')));
-
 export async function setIdbProjects(data = []) {
   const db = await initDB();
   const tx = db.transaction(PROJECT_STORE_NAME, 'readwrite');
   data.forEach((item) => {
     tx.store.put(item);
   });
-  await done(tx);
+  await tx.done;
   return db.getAllFromIndex(PROJECT_STORE_NAME, 'id');
 }
 
 export async function setIdbProject(data = {}) {
   const db = await initDB();
   const tx = db.transaction(PROJECT_STORE_NAME, 'readwrite');
-  await done(tx);
+  await tx.done;
   return db.getFromIndex(PROJECT_STORE_NAME, 'id', data.id);
 }
 

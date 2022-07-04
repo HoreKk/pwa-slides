@@ -8,10 +8,6 @@ const container = document.getElementById("root");
 
 const root = createRoot(container);
 
-document.addEventListener('db-updated', () => { 
-  console.log('db updated')
-})
-
 checkConnectivity({
   interval: 3000,
   threshold: 2000,

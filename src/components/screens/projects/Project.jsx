@@ -49,8 +49,8 @@ function Project() {
 
   function addSlide() {
     push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
-        name: "New Slide",
-        content: "",
+      name: "New Slide",
+      content: "",
     });
     toast.success('Slide added');
   }
