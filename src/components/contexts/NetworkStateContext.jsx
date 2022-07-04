@@ -27,11 +27,11 @@ export const NetworkState = ({ children }) => {
   useEffect(() => {
     if (networkState) {
       if (!isFirstTime) {
-        toaster.success('Your connection network is back !');
+        toaster.success('Your network connection is back !');
       }
 
     } else {
-      toaster.error('Your connection network is lost, offline mode is activated'); 
+      toaster.error('Your network connection is lost, offline mode is activated'); 
     }
   }, [networkState])
 
