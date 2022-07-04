@@ -3,7 +3,7 @@ import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalF
 import { useRef } from 'react';
 
 
-export function CopyLinkModal({ link }) {
+export function CopyLinkModal() {
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const linkRef = useRef(null);
