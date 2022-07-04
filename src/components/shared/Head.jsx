@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-const SERVICE_NAME = import.meta.env.VITE_SERVICE_NAME
+const SERVICE_NAME = import.meta.env.VITE_SERVICE_NAME;
 
 export const Head = ({ title, description }) => (
   <Helmet>
