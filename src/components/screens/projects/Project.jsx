@@ -2,43 +2,64 @@ import { useState, useEffect } from 'react';
 import { useAuthState } from '~/components/contexts/UserContext';
 // import { Head } from '~/components/shared/Head';
 import { Presentation } from './Reveal';
-import { AspectRatio, Box, Button, Flex, Heading, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
-import { onValue, push, ref, remove, update } from "firebase/database";
+import {
+  AspectRatio,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Skeleton,
+  Spinner,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+} from '@chakra-ui/react';
+import { onValue, push, ref, remove, update } from 'firebase/database';
 import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill';
-import { useParams } from "react-router-dom";
+import { useParams } from 'react-router-dom';
 import { database } from '../../../lib/firebase';
 import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
 
 const modules = {
   toolbar: [
-    [{ 'header': [1, 2, false] }],
-    ['bold', 'italic', 'underline','strike', 'blockquote'],
-    [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-    [{ 'color': [] }],
+    [{ header: [1, 2, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+    [{ color: [] }],
     ['link', 'image'],
-    ['clean']
+    ['clean'],
   ],
-}
+};
 
 const formats = [
   'header',
-  'bold', 'italic', 'underline', 'strike', 'blockquote',
-  'list', 'bullet', 'indent',
-  'link', 'image', 'color'
-]
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'list',
+  'bullet',
+  'indent',
+  'link',
+  'image',
+  'color',
+];
 
 function Project() {
-
   const { userId, projectId } = useParams();
   const [project, setProject] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedSlideId, setSelectedSlideId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [projectName, setProjectName] = useState('Untitled Project');
+  const [projectName, setProjectName] = useState('');
 
   if (userId && !Object.values(project).length) {
-    let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`)
+    let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`);
     let firstLoad = false;
     let firstSlideInitialized = false;
     onValue(refProject, async (snapshot) => {
@@ -66,8 +87,8 @@ function Project() {
 
   function addSlide() {
     push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
-      name: "New Slide",
-      content: "",
+      name: 'New Slide',
+      content: '',
     });
     toast.success('Slide added');
   }
@@ -81,7 +102,7 @@ function Project() {
   function deleteSlide() {
     if (project.slides.length > 1) {
       remove(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${selectedSlideId}`));
-      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id)
+      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id);
       document.getElementById(`tabs-:r0:--tab-0`).click();
     } else {
       toast.error('You need at least one slide');
@@ -115,12 +136,14 @@ function Project() {
       },
       false
     );
-    if (userId && projectName !== project.name) {
-      update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
-        name: projectName,
-      });
-    }
+
+    if (projectName === '') return;
+    update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
+      name: projectName,
+    });
   }, [isFullscreen, projectName]);
+
+  useEffect(() => {}, [projectName]);
 
   return (
     <>
@@ -128,10 +151,14 @@ function Project() {
         <Presentation slides={project.slides} />
       ) : (
         <Box mt={12} my="auto" style={{ height: 'calc(100vh - 100px)' }}>
-          <Flex justify="space-between" align="center" w="full" mt={8} px={4}>
+          <Flex justify="space-between" align={{ base: "left", md: 'center'}} w="full" mt={8} px={4} flexDirection={{ base: 'column', md: 'row' }}>
             <Skeleton isLoaded={isLoaded}>
               <Heading>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} style={{ width: '1000px'}}></input>
+                <input
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  style={{ base: {width: '50vw', textAlign: 'left'}, md: {width: '50vw', textAlign: 'center'} }}
+                ></input>
               </Heading>
             </Skeleton>
             <Flex align="center">
@@ -155,7 +182,12 @@ function Project() {
                 variant="unstyled"
                 onChange={(currentIndex) => setSelectedSlideId(project.slides[currentIndex].id)}
               >
-                <TabList borderY="1px" borderColor="gray.300" overflowY="auto" style={{ height: 'calc(100vh - 163px)' }}>
+                <TabList
+                  borderY="1px"
+                  borderColor="gray.300"
+                  overflowY="auto"
+                  style={{ height: 'calc(100vh - 163px)' }}
+                >
                   {project.slides.map((slide, index) => (
                     <Tab
                       key={slide.id}
