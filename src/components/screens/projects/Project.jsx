@@ -1,31 +1,50 @@
-import { useState, useEffect } from 'react';
-import { useAuthState } from '~/components/contexts/UserContext';
+import { useEffect, useState } from 'react';
 // import { Head } from '~/components/shared/Head';
-import { Presentation } from './Reveal';
-import { AspectRatio, Box, Button, Flex, Heading, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
+import { AspectRatio, Box, Button, Flex, Heading, Input, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
 import { onValue, push, ref, remove, update } from "firebase/database";
 import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill';
 import { useParams } from "react-router-dom";
 import { database } from '../../../lib/firebase';
+import { uploadFile } from '../../../lib/storage';
 import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
+import { Presentation } from './Reveal';
+
 
 const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, false] }],
-    ['bold', 'italic', 'underline','strike', 'blockquote'],
-    [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-    [{ 'color': [] }],
-    ['link', 'image'],
-    ['clean']
-  ],
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+      [{ 'color': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+    handlers: {
+      image: async function image() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+
+        // Listen upload local image and save to server
+        input.onchange = async () => {
+          const file = input.files[0];
+          const fireStoreUrl = await uploadFile(file)
+          const range = this.quill.getSelection();
+          this.quill.insertEmbed(range.index, 'image', fireStoreUrl);
+        };
+      }
+    }
+  }
 }
+
 
 const formats = [
   'header',
   'bold', 'italic', 'underline', 'strike', 'blockquote',
   'list', 'bullet', 'indent',
-  'link', 'image', 'color'
+  'link', 'image', 'color', 'handlers'
 ]
 
 function Project() {
@@ -102,23 +121,26 @@ function Project() {
     }
   }
 
-  // Event listener for fullscreen change
+ 
   useEffect(() => {
-    document.addEventListener(
-      'fullscreenchange',
-      () => {
-        if (isFullscreen) {
-          setIsFullscreen(false);
-        } else {
-          setIsFullscreen(true);
-        }
-      },
-      false
-    );
+    const handleRevealJs = () => {
+      if (isFullscreen) {
+        setIsFullscreen(false);
+      } else {
+        setIsFullscreen(true);
+      }
+    }
+    // Event listener for fullscreen change
+    document.addEventListener('fullscreenchange', handleRevealJs, false);
+
     if (userId && projectName !== project.name) {
       update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
         name: projectName,
       });
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleRevealJs, false);
     }
   }, [isFullscreen, projectName]);
 
@@ -131,7 +153,7 @@ function Project() {
           <Flex justify="space-between" align="center" w="full" mt={8} px={4}>
             <Skeleton isLoaded={isLoaded}>
               <Heading>
-                <input value={projectName} onChange={e => setProjectName(e.target.value)} style={{ width: '1000px'}}></input>
+                <Input fontSize={30} value={projectName} onChange={e => setProjectName(e.target.value)} />
               </Heading>
             </Skeleton>
             <Flex align="center">

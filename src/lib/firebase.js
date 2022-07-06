@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDatabase, remove, onValue, push, ref, serverTimestamp } from 'firebase/database';
+import { getStorage } from 'firebase/storage';
 
 const app = initializeApp({
   apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
@@ -14,6 +15,7 @@ const app = initializeApp({
 
 export const database = getDatabase(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 export function authChanged(cb = () => {}) {
   onAuthStateChanged(auth, (user) => {
