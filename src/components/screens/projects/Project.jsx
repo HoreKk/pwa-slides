@@ -1,54 +1,50 @@
-import { useState, useEffect } from 'react';
-import { useAuthState } from '~/components/contexts/UserContext';
-// import { Head } from '~/components/shared/Head';
-import { Presentation } from './Reveal';
-import {
-  AspectRatio,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Skeleton,
-  Spinner,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-} from '@chakra-ui/react';
-import { onValue, push, ref, remove, update } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { AspectRatio, Box, Button, Flex, Heading, Input, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
+import { onValue, push, ref, remove, update } from "firebase/database";
 import toast from 'react-hot-toast';
 import ReactQuill from 'react-quill';
 import { useParams } from 'react-router-dom';
 import { database } from '../../../lib/firebase';
+import { uploadFile } from '../../../lib/storage';
 import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
+import { Presentation } from './Reveal';
+
 
 const modules = {
-  toolbar: [
-    [{ header: [1, 2, false] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-    [{ color: [] }],
-    ['link', 'image'],
-    ['clean'],
-  ],
-};
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+      [{ 'color': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+    handlers: {
+      image: async function image() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.click();
+
+        // Listen upload local image and save to server
+        input.onchange = async () => {
+          const file = input.files[0];
+          const fireStoreUrl = await uploadFile(file)
+          const range = this.quill.getSelection();
+          this.quill.insertEmbed(range.index, 'image', fireStoreUrl);
+        };
+      }
+    }
+  }
+}
+
 
 const formats = [
   'header',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'blockquote',
-  'list',
-  'bullet',
-  'indent',
-  'link',
-  'image',
-  'color',
-];
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'color', 'handlers'
+]
 
 function Project() {
   const { userId, projectId } = useParams();
@@ -123,27 +119,23 @@ function Project() {
     }
   }
 
-  // Event listener for fullscreen change
+ 
   useEffect(() => {
-    document.addEventListener(
-      'fullscreenchange',
-      () => {
-        if (isFullscreen) {
-          setIsFullscreen(false);
-        } else {
-          setIsFullscreen(true);
-        }
-      },
-      false
-    );
-
     if (projectName === '') return;
     update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
       name: projectName,
     });
-  }, [isFullscreen, projectName]);
 
-  useEffect(() => {}, [projectName]);
+    const handleRevealJs = () => {
+      if (isFullscreen) {
+        setIsFullscreen(false);
+      } else {
+        setIsFullscreen(true);
+      }
+    }
+    // Event listener for fullscreen change
+    document.addEventListener('fullscreenchange', handleRevealJs, false);
+  }, [isFullscreen, projectName]);
 
   return (
     <>
@@ -154,11 +146,12 @@ function Project() {
           <Flex justify="space-between" align={{ base: "left", md: 'center'}} w="full" mt={8} px={4} flexDirection={{ base: 'column', md: 'row' }}>
             <Skeleton isLoaded={isLoaded}>
               <Heading>
-                <input
+                {/* <input
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   style={{ base: {width: '50vw', textAlign: 'left'}, md: {width: '50vw', textAlign: 'center'} }}
-                ></input>
+                ></input> */}
+                <Input fontSize={30} value={projectName} style={{ base: {width: '50vw', textAlign: 'left'}, md: {width: '50vw', textAlign: 'center'} }} onChange={e => setProjectName(e.target.value)} />
               </Heading>
             </Skeleton>
             <Flex align="center">

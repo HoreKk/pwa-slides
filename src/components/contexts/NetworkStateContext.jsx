@@ -31,7 +31,7 @@ export const NetworkState = ({ children }) => {
       }
 
     } else {
-      toaster.error('Your network connection was lost, offline mode is activated'); 
+      toaster.error('You have lost your network connection, offline mode is activated'); 
     }
   }, [networkState])
 
