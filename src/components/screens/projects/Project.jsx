@@ -23,6 +23,7 @@ const modules = {
     handlers: {
       image: async function image() {
         const input = document.createElement('input');
+        input.setAttribute('accept', 'image/*');
         input.setAttribute('type', 'file');
         input.click();
 
@@ -31,7 +32,11 @@ const modules = {
           const file = input.files[0];
           const fireStoreUrl = await uploadFile(file)
           const range = this.quill.getSelection();
-          this.quill.insertEmbed(range.index, 'image', fireStoreUrl);
+          if (file.type.match(/image/)) {
+            this.quill.insertEmbed(range.index, 'image', fireStoreUrl);
+          } else {
+            toast.error('File is not supported');
+          }
         };
       }
     }
@@ -52,34 +57,66 @@ function Project() {
   const [selectedSlideId, setSelectedSlideId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [projectName, setProjectName] = useState('');
+  const [position, setPosition] = useState(0)
   const tabRef = useRef(null);
 
-  if (userId && !Object.values(project).length) {
-    let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`);
-    let firstLoad = false;
-    let firstSlideInitialized = false;
-    onValue(refProject, async (snapshot) => {
-      let { slides, ...tmpProject } = snapshot.val();
-      let tmpSlides = [];
-      if (!slides && !firstSlideInitialized) {
-        firstSlideInitialized = true;
-        await push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
-          name: 'New Slide',
-          content: '',
-        });
-      }
-      if (slides) {
-        Object.entries(slides).forEach(([key, value]) => tmpSlides.push({ id: key, ...value }));
-        setProject({ ...tmpProject, slides: tmpSlides });
-        setProjectName(tmpProject.name);
-        if (!firstLoad) {
-          setSelectedSlideId(tmpSlides[0].id);
-          firstLoad = true;
-          setIsLoaded(true);
+  useEffect(() => {
+    if (userId && !Object.values(project).length) {
+      let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`);
+      let firstLoad = false;
+      let firstSlideInitialized = false;
+      onValue(refProject, async (snapshot) => {
+        let { slides, ...tmpProject } = snapshot.val();
+        let tmpSlides = [];
+        if (!slides && !firstSlideInitialized) {
+          firstSlideInitialized = true;
+          await push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
+            name: 'New Slide',
+            content: '',
+          });
         }
-      }
-    });
-  }
+        if (slides) {
+          Object.entries(slides).forEach(([key, value]) => tmpSlides.push({ id: key, ...value }));
+          setProject({ ...tmpProject, slides: tmpSlides });
+          setProjectName(tmpProject.name);
+          
+          if (!firstLoad) {
+            setSelectedSlideId(tmpSlides[0].id);
+            firstLoad = true;
+            setIsLoaded(true);
+          }
+        }
+      });
+    }
+  }, [selectedSlideId])
+
+  
+
+  useEffect(() => {
+    if (!project.slides?.length) {
+      return
+    }
+    if (!position) {
+      return
+    }
+    if (!isLoaded) {
+      return
+    }
+    let nextPosition = 0
+    if (position === 0) {
+      nextPosition = 0
+    } else if (position === project.slides.length) {
+      nextPosition = project.slides.length - 1
+    } else {
+      nextPosition = position
+    }
+
+
+    tabRef.current.children[nextPosition].click();
+    setSelectedSlideId(project.slides[nextPosition].id);
+    setPosition(nextPosition)
+    
+  }, [project])
 
   function addSlide() {
     push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
@@ -97,10 +134,9 @@ function Project() {
 
   function deleteSlide() {
     if (project.slides.length > 1) {
-      const idx = project.slides.findIndex(slide => slide.id === selectedSlideId);
       remove(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${selectedSlideId}`));
-      setSelectedSlideId(project.slides[idx - 1].id);
-      tabRef.current.children[idx - 1].click()
+      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id);
+      tabRef.current.children[0].click()
     } else {
       toast.error('You need at least one slide');
     }
@@ -173,7 +209,7 @@ function Project() {
                 colorScheme="transparent"
                 variant="unstyled"
                 w='full'
-                onChange={(currentIndex) => setSelectedSlideId(project.slides[currentIndex].id)}
+                onChange={(currentIndex) => setSelectedSlideId(project.slides[currentIndex]?.id)}
                 flexDir={{ base: 'column-reverse', md: 'row' }}
               >
                 <TabList
@@ -214,15 +250,17 @@ function Project() {
                   {project.slides.map((slide) => (
                     <TabPanel padding={{ sm: '10px 0 10px 0', md: '0'}} key={slide.id} w="full" h="full" textAlign="center" p={0}>
                       <ReactQuill
-                        theme="snow"
                         value={slide.content}
-                        key={slide.id}
                         onChange={(content) => changeContentSlide(slide.id, content)}
-                        style={{ height: 'calc(100vh - 207px)' }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          height: '100%',
+                          background: 'white',
+                        }}
                         formats={formats}
                         modules={modules}
                       >
-                        <Box className="my-editing-area" />
                       </ReactQuill>
                     </TabPanel>
                   ))}
