@@ -28,7 +28,7 @@ export function CopyLinkModal() {
           <ModalHeader>Invitation link</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input value={window.location.href} ref={linkRef} placeholder='medium size' size='md' />
+            <Input defaultValue={window.location.href} readOnly ref={linkRef} placeholder='medium size' size='md' />
           </ModalBody>
 
           <ModalFooter>
