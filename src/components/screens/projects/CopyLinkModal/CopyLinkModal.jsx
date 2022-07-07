@@ -1,7 +1,6 @@
-import { AddIcon } from '@chakra-ui/icons';
-import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
+import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure, Icon } from '@chakra-ui/react';
 import { useRef } from 'react';
-
+import { MdPersonAdd } from 'react-icons/md';
 
 export function CopyLinkModal() {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -17,7 +16,10 @@ export function CopyLinkModal() {
 
   return (
     <>
-      <Button onClick={onOpen}>Invit people<AddIcon ml={2} /></Button>
+      <Button onClick={onOpen}>
+        <Icon fontSize={18} as={MdPersonAdd}>
+        </Icon>
+      </Button>
       
 
       <Modal isOpen={isOpen} onClose={onClose}>

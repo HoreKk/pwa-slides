@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { AspectRatio, Box, Button, Flex, Heading, Input, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
+import { useEffect, useState, useRef } from 'react';
+import { AspectRatio, Box, Button, Flex, Heading, Icon, Input, Skeleton, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from '@chakra-ui/react';
 import { onValue, push, ref, remove, update } from "firebase/database";
 import toast from 'react-hot-toast';
-import ReactQuill from 'react-quill';
 import { useParams } from 'react-router-dom';
 import { database } from '../../../lib/firebase';
 import { uploadFile } from '../../../lib/storage';
 import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
 import { Presentation } from './Reveal';
-
+import { MdDelete, MdNoteAdd, MdPlayCircle } from "react-icons/md";
+import ReactQuill from 'react-quill';
 
 const modules = {
   toolbar: {
@@ -38,7 +38,6 @@ const modules = {
   }
 }
 
-
 const formats = [
   'header',
   'bold', 'italic', 'underline', 'strike', 'blockquote',
@@ -53,6 +52,7 @@ function Project() {
   const [selectedSlideId, setSelectedSlideId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [projectName, setProjectName] = useState('');
+  const tabRef = useRef(null);
 
   if (userId && !Object.values(project).length) {
     let refProject = ref(database, `workSpace-${userId}/projects/${projectId}`);
@@ -97,9 +97,10 @@ function Project() {
 
   function deleteSlide() {
     if (project.slides.length > 1) {
+      const idx = project.slides.findIndex(slide => slide.id === selectedSlideId);
       remove(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${selectedSlideId}`));
-      setSelectedSlideId(project.slides[findSlideSelected() === 0 ? 1 : 0].id);
-      document.getElementById(`tabs-:r0:--tab-0`).click();
+      setSelectedSlideId(project.slides[idx - 1].id);
+      tabRef.current.children[idx - 1].click()
     } else {
       toast.error('You need at least one slide');
     }
@@ -119,7 +120,7 @@ function Project() {
     }
   }
 
- 
+
   useEffect(() => {
     if (projectName === '') return;
     update(ref(database, `/workSpace-${userId}/projects/${projectId}`), {
@@ -142,44 +143,46 @@ function Project() {
       {isFullscreen ? (
         <Presentation slides={project.slides} />
       ) : (
-        <Box mt={12} my="auto" style={{ height: 'calc(100vh - 100px)' }}>
-          <Flex justify="space-between" align={{ base: "left", md: 'center'}} w="full" mt={8} px={4} flexDirection={{ base: 'column', md: 'row' }}>
+        <Box style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column'}}>
+          <Flex bg={'white'} padding='2' justify="space-between" align={{ base: "left", md: 'center' }} w="full" px={4} flexDirection={{ base: 'column', md: 'row' }}>
             <Skeleton isLoaded={isLoaded}>
               <Heading>
-                {/* <input
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  style={{ base: {width: '50vw', textAlign: 'left'}, md: {width: '50vw', textAlign: 'center'} }}
-                ></input> */}
-                <Input fontSize={30} value={projectName} style={{ base: {width: '50vw', textAlign: 'left'}, md: {width: '50vw', textAlign: 'center'} }} onChange={e => setProjectName(e.target.value)} />
+                <Input fontSize={30} value={projectName} style={{ base: { width: '50vw', textAlign: 'left' }, md: { width: '50vw', textAlign: 'center' } }} onChange={e => setProjectName(e.target.value)} />
               </Heading>
             </Skeleton>
-            <Flex align="center">
+            <Flex padding={'3'} justifyContent={'space-between'} align="center">
               <CopyLinkModal />
-              <Button onClick={toggleFullScreen} colorScheme="blue" ml={4}>
-                Start presentation
+              <Button onClick={toggleFullScreen} ml={4}>
+                <Icon fontSize={18} as={MdPlayCircle}>
+                </Icon>
               </Button>
-              <Button onClick={addSlide} colorScheme="green" ml={4}>
-                Add new slide
+              <Button onClick={addSlide} ml={4}>
+                <Icon fontSize={18} as={MdNoteAdd}>
+                </Icon>
               </Button>
-              <Button onClick={deleteSlide} colorScheme="red" ml={4}>
-                Delete current slide
+              <Button onClick={deleteSlide} colorScheme='red'  ml={4}>
+                <Icon fontSize={18} as={MdDelete}>
+                </Icon>
               </Button>
             </Flex>
           </Flex>
-          <Box mt={8} w="full" style={{ height: 'calc(100vh - 163px)' }}>
+          <Flex padding={{ sm: '', md: '10px'}} flexGrow='1'>
             {isLoaded ? (
               <Tabs
                 orientation="vertical"
                 colorScheme="transparent"
                 variant="unstyled"
+                w='full'
                 onChange={(currentIndex) => setSelectedSlideId(project.slides[currentIndex].id)}
+                flexDir={{ base: 'column-reverse', md: 'row' }}
               >
                 <TabList
                   borderY="1px"
                   borderColor="gray.300"
                   overflowY="auto"
-                  style={{ height: 'calc(100vh - 163px)' }}
+                  bg={'white'}
+                  flexDir={{ base: 'row', md: 'column' }}
+                  ref={tabRef}
                 >
                   {project.slides.map((slide, index) => (
                     <Tab
@@ -205,9 +208,11 @@ function Project() {
                     </Tab>
                   ))}
                 </TabList>
-                <TabPanels>
+                <TabPanels
+                  flexGrow='1'
+                >
                   {project.slides.map((slide) => (
-                    <TabPanel key={slide.id} w="full" textAlign="center" p={0}>
+                    <TabPanel padding={{ sm: '10px 0 10px 0', md: '0'}} key={slide.id} w="full" h="full" textAlign="center" p={0}>
                       <ReactQuill
                         theme="snow"
                         value={slide.content}
@@ -235,7 +240,7 @@ function Project() {
                 size="xl"
               />
             )}
-          </Box>
+          </Flex>
         </Box>
       )}
     </>
