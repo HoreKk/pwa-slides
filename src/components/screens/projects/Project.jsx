@@ -57,7 +57,6 @@ function Project() {
   const [selectedSlideId, setSelectedSlideId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [projectName, setProjectName] = useState('');
-  const [position, setPosition] = useState(0)
   const tabRef = useRef(null);
 
   useEffect(() => {
@@ -91,33 +90,6 @@ function Project() {
   }, [selectedSlideId])
 
   
-
-  useEffect(() => {
-    if (!project.slides?.length) {
-      return
-    }
-    if (!position) {
-      return
-    }
-    if (!isLoaded) {
-      return
-    }
-    let nextPosition = 0
-    if (position === 0) {
-      nextPosition = 0
-    } else if (position === project.slides.length) {
-      nextPosition = project.slides.length - 1
-    } else {
-      nextPosition = position
-    }
-
-
-    tabRef.current.children[nextPosition].click();
-    setSelectedSlideId(project.slides[nextPosition].id);
-    setPosition(nextPosition)
-    
-  }, [project])
-
   function addSlide() {
     push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
       name: 'New Slide',
