@@ -8,9 +8,17 @@ import { uploadFile } from '../../../lib/storage';
 import { CopyLinkModal } from './CopyLinkModal/CopyLinkModal';
 import { Presentation } from './Reveal';
 import { MdDelete, MdNoteAdd, MdPlayCircle } from "react-icons/md";
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
+
+class PreserveWhiteSpace {
+  constructor(quill, options) {
+    quill.container.style.whiteSpace = "pre-line";
+  }
+}
+Quill.register('modules/preserveWhiteSpace', PreserveWhiteSpace);
 
 const modules = {
+  preserveWhiteSpace: true,
   toolbar: {
     container: [
       [{ 'header': [1, 2, false] }],
@@ -85,7 +93,9 @@ function Project() {
             setIsLoaded(true);
           }
         }
-      });
+      }, {
+        onlyOnce: false
+      });  
     }
   }, [selectedSlideId])
 
