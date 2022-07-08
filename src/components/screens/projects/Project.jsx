@@ -18,6 +18,9 @@ class PreserveWhiteSpace {
 Quill.register('modules/preserveWhiteSpace', PreserveWhiteSpace);
 
 const modules = {
+  clipboard: {
+    matchVisual: false,
+  },
   preserveWhiteSpace: true,
   toolbar: {
     container: [
@@ -86,7 +89,7 @@ function Project() {
           Object.entries(slides).forEach(([key, value]) => tmpSlides.push({ id: key, ...value }));
           setProject({ ...tmpProject, slides: tmpSlides });
           setProjectName(tmpProject.name);
-          
+
           if (!firstLoad) {
             setSelectedSlideId(tmpSlides[0].id);
             firstLoad = true;
@@ -95,11 +98,11 @@ function Project() {
         }
       }, {
         onlyOnce: false
-      });  
+      });
     }
   }, [selectedSlideId])
 
-  
+
   function addSlide() {
     push(ref(database, `/workSpace-${userId}/projects/${projectId}/slides`), {
       name: 'New Slide',
@@ -109,9 +112,22 @@ function Project() {
   }
 
   function changeContentSlide(id, content) {
+    if (content.endsWith('<p><br></p>')) {
+      return
+    }
     update(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${id}`), {
-      content,
+      content: content,
     });
+  }
+
+  // Quill ne gère pas le cas où on spam 'ENTRER', 
+  // en gros il active le onChange une fois sur deux si on spam entrer
+  function onKeyDown(id, content) {
+    if (content.key === 'Enter') {
+      update(ref(database, `/workSpace-${userId}/projects/${projectId}/slides/${id}`), {
+        content: content.target.innerHTML,
+      });
+    }
   }
 
   function deleteSlide() {
@@ -161,7 +177,7 @@ function Project() {
       {isFullscreen ? (
         <Presentation slides={project.slides} />
       ) : (
-        <Box style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column'}}>
+        <Box style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
           <Flex bg={'white'} padding='2' justify="space-between" align={{ base: "left", md: 'center' }} w="full" px={4} flexDirection={{ base: 'column', md: 'row' }}>
             <Skeleton isLoaded={isLoaded}>
               <Heading>
@@ -178,13 +194,13 @@ function Project() {
                 <Icon fontSize={18} as={MdNoteAdd}>
                 </Icon>
               </Button>
-              <Button onClick={deleteSlide} colorScheme='red'  ml={4}>
+              <Button onClick={deleteSlide} colorScheme='red' ml={4}>
                 <Icon fontSize={18} as={MdDelete}>
                 </Icon>
               </Button>
             </Flex>
           </Flex>
-          <Flex padding={{ sm: '', md: '10px'}} flexGrow='1'>
+          <Flex padding={{ sm: '', md: '10px' }} flexGrow='1'>
             {isLoaded ? (
               <Tabs
                 orientation="vertical"
@@ -230,7 +246,7 @@ function Project() {
                   flexGrow='1'
                 >
                   {project.slides.map((slide) => (
-                    <TabPanel padding={{ sm: '10px 0 10px 0', md: '0'}} key={slide.id} w="full" h="full" textAlign="center" p={0}>
+                    <TabPanel padding={{ sm: '10px 0 10px 0', md: '0' }} key={slide.id} w="full" h="full" textAlign="center" p={0}>
                       <ReactQuill
                         value={slide.content}
                         onChange={(content) => changeContentSlide(slide.id, content)}
@@ -240,6 +256,7 @@ function Project() {
                           height: '100%',
                           background: 'white',
                         }}
+                        onKeyDown={(e) => onKeyDown(slide.id, e)}
                         formats={formats}
                         modules={modules}
                       >
