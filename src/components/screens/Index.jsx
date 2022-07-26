@@ -93,6 +93,7 @@ function Index() {
                 disabled={editMode}
                 onClick={createProject}
                 colorScheme="green"
+                ml={2}
               >
                 Add new project
               </Button>
