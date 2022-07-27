@@ -177,6 +177,9 @@ function Project() {
     }
     // Event listener for fullscreen change
     document.addEventListener('fullscreenchange', handleRevealJs, false);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleRevealJs, false);
+    }
   }, [isFullscreen, projectName]);
 
   const container = useRef(null);

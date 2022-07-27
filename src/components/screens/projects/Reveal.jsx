@@ -5,12 +5,15 @@ import '/node_modules/reveal.js/dist/reveal.css';
 import '/node_modules/reveal.js/dist/theme/white.css';
 
 export function Presentation(props) {
-  useEffect(() => {
-    let deck = new Reveal({
+
+  const deck = () => {
+    new Reveal({
       backgroundTransition: 'slide',
       transition: 'slide',
-    });
-    deck.initialize();
+    }).initialize();
+  }
+  useEffect(() => {
+    deck();
   }, []);
 
   return (
